@@ -11,25 +11,19 @@ public class TextLCD{
 	LCDType _type;
 	int _column;
 	int _row;
-	public TextLCD(Mcu mcu , DigitalOut rs,DigitalOut ee ,BusOut dd)
-	{
-		_mcu = mcu;
-		_rs = rs;
-		_e = ee;
-		_d = dd;
-		
-		try {
-			Thread.sleep(15);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		
-	}
+	/**
+	 * 
+	 * @param mcu
+	 * @param rs
+	 * @param ee
+	 * @param d0
+	 * @param d1
+	 * @param d2
+	 * @param d3
+	 * @param type LCDの機種
+	 */
 	public TextLCD(Mcu mcu , int rs, int ee,
 	int d0, int d1, int d2, int d3,LCDType type)
-	//LCDType type = LCD16x2){
 	{
 		_type = type;
 		_mcu = mcu;
@@ -64,9 +58,14 @@ public class TextLCD{
 		}
 		
 	}
-
+	/**
+	 * 文字を1文字表示する
+	 * @param c 出力する文字
+	 * @return
+	 */
 	public int putc(int c)
 	{
+		// 改行処理
 		if(c == '\n'){
 			_column = 0;
 			_row ++;
@@ -86,14 +85,18 @@ public class TextLCD{
 		}
 		return c;
 	}
-	public int printf(String string)
-	{
-		return -1;
-	}
+	/**
+	 * 任意の位置にカーソルを移動する
+	 * @param column 
+	 * @param row
+	 */
 	public void locate(int column , int row){
 		_column = column;
 		_row = row;
 	}
+	/**
+	 * 表示を消してカーソルを（0,0）に移動する
+	 */
 	public void cls()
 	{
 		writeCommand(0x01);
@@ -106,6 +109,10 @@ public class TextLCD{
 		locate( 0 , 0);
 		
 	}
+	/**
+	 * 行の数を返す
+	 * @return
+	 */
 	public int rows()
 	{
 		switch(_type){
@@ -118,6 +125,10 @@ public class TextLCD{
 		}
 		return 0;
 	}
+	/**
+	 * 列の数を返す
+	 * @return
+	 */
 	public int columns(){
 		switch(_type){
 		case LCD20x4:
@@ -129,6 +140,12 @@ public class TextLCD{
 		}
 		return 0;
 	}
+	/**
+	 * 文字を書き込むアドレスを決定する
+	 * @param column
+	 * @param row
+	 * @return
+	 */
 	int address(int column , int row){
 		switch (_type){
 		case LCD20x4:
@@ -150,12 +167,22 @@ public class TextLCD{
 		}
 		return 0x80 + (row*0x40) + column;
 	}
+	/**
+	 * 文字を出力する
+	 * @param column 行 
+	 * @param row 列
+	 * @param c 文字
+	 */
 	void character(int column , int row , int c)
 	{
 		int a = address(column , row);
 		writeCommand(a);
 		writeData(c);
 	}
+	/**
+	 * 1バイト出力する
+	 * @param value
+	 */
 	void writeByte(int value){
 		try {
 			_d.write(value >> 4);
@@ -177,6 +204,10 @@ public class TextLCD{
 		}
 		
 	}
+	/**
+	 * コマンドを出力
+	 * @param command
+	 */
 	void writeCommand(int command){
 		try {
 			_rs.write(0);
@@ -186,6 +217,10 @@ public class TextLCD{
 		}
 		writeByte(command);
 	}
+	/**
+	 * データを出力
+	 * @param data
+	 */
 	void writeData(int data){
 		try {
 			_rs.write(1);
